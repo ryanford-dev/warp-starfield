@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <style>
+        canvas {
+            background-color: #000;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="stars" height="500" width="500"></canvas>
+<script>
+  (function() {
+    document.addEventListener("DOMContentLoaded", function() {
+      const canvas = document.getElementById("stars");
+      const ctx = canvas.getContext("2d");
+      const rect = canvas.getBoundingClientRect();
+      const NUM_BANDS = 100;
+      const SPEED = 2;
+      let prevTime = performance.now();
+      let timeNow = prevTime;
+      let dt = 0;
+      let _bands = [];
+      const warp = {
+        x: canvas.width/2,
+        y: canvas.height/2,
+      }
+      const destination = {
+        x: warp.x,
+        y: warp.y,
+      }
+
+      function describeStar() {
+        return {
+          angle: Math.random() * Math.PI * 2,
+          originX: warp.x - rect.left,
+          originY: warp.y - rect.top,
+        }
+      }
+
+      function generateBand() {
+        return Array(10).fill(undefined).map(describeStar)
+      }
+
+      function getPoint(star, index) {
+        star.x = Math.cos(star.angle) * (25 + 2**((index/(NUM_BANDS/10)) - 1));
+        star.y = Math.sin(star.angle) * (25 + 2**((index/(NUM_BANDS/10)) - 1));
+
+        return star
+      }
+
+      function generatePoints(band, index) {
+        return band.map(function(star) {
+          return getPoint(star, index)
+        })
+      }
+
+      function updateBands(bands = []) {
+        return [generateBand(), ...bands.length < NUM_BANDS ? bands : bands.slice(0, -1)]
+      }
+
+      function drawStar(star, index) {
+        ctx.fillStyle = `rgba(255, 255, 255, ${1 - (NUM_BANDS - index)/NUM_BANDS})`;
+        ctx.fillRect(star.originX + star.x, star.originY + star.y, 2, 2)
+      }
+
+      function update() {
+        prevTime = timeNow;
+        timeNow = performance.now();
+        dt = timeNow - prevTime;
+        _bands = updateBands(_bands);
+        if (Math.floor(warp.x) === Math.floor(destination.x) || Math.floor(warp.y) === Math.floor(destination.y)) {
+          destination.x = Math.random() * (canvas.width - 20) + 10;
+          destination.y = Math.random() * (canvas.height - 20) + 10;
+        } else {
+          const distance = Math.sqrt((destination.x - warp.x)**2 + (destination.y - warp.y)**2)
+          const r = SPEED / distance;
+          warp.x = r * destination.x + (1 - r) * warp.x;
+          warp.y = r * destination.y + (1 - r) * warp.y;
+        }
+        
+        return _bands.map(generatePoints)
+      }
+
+      function draw(bands) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
+        bands.forEach(function(band, bandIndex) {
+          band.forEach(function(star, starIndex) {
+            drawStar(star, bandIndex)
+          })
+        })
+
+        requestAnimationFrame(function() {
+          return draw(update())
+        })
+      }
+
+      canvas.addEventListener("mousemove", function(e) {
+        warp.x = e.clientX - rect.left
+        warp.y = e.clientY - rect.top
+      })
+
+      draw(update())
+    })
+  })()
+</script>
+</body>
+</html>
