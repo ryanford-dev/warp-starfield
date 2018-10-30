@@ -4,17 +4,24 @@
     <meta charset="UTF-8">
     <title></title>
     <style>
+        body {
+          margin: 0;
+          overflow: hidden;
+        }
+
         canvas {
             background-color: #000;
         }
     </style>
 </head>
 <body>
-    <canvas id="stars" height="600" width="1300"></canvas>
+    <canvas id="stars"></canvas>
 <script>
   (function() {
     document.addEventListener("DOMContentLoaded", function() {
       const canvas = document.getElementById("stars");
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
       const ctx = canvas.getContext("2d");
       const rect = canvas.getBoundingClientRect();
       const NUM_BANDS = 100;
