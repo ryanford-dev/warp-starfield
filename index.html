@@ -18,7 +18,7 @@
       const ctx = canvas.getContext("2d");
       const rect = canvas.getBoundingClientRect();
       const NUM_BANDS = 100;
-      const SPEED = 2;
+      let speed = 2;
       let prevTime = performance.now();
       let timeNow = prevTime;
       let dt = 0;
@@ -71,12 +71,13 @@
         timeNow = performance.now();
         dt = timeNow - prevTime;
         _bands = updateBands(_bands);
-        if (Math.floor(warp.x) === Math.floor(destination.x) || Math.floor(warp.y) === Math.floor(destination.y)) {
+        if (Math.abs(warp.x - destination.x) <= 25 || Math.abs(warp.y - destination.y) <= 25) {
           destination.x = Math.random() * (canvas.width - 20) + 10;
           destination.y = Math.random() * (canvas.height - 20) + 10;
+          speed = Math.random() * 4 + 1;
         } else {
           const distance = Math.sqrt((destination.x - warp.x)**2 + (destination.y - warp.y)**2)
-          const r = SPEED / distance;
+          const r = speed / distance;
           warp.x = r * destination.x + (1 - r) * warp.x;
           warp.y = r * destination.y + (1 - r) * warp.y;
         }
